@@ -1,0 +1,8 @@
+*~
+.DS_Store
+.sass-cache
+app/scripts/vendor
+app/scripts/config.js
+node_modules
+npm-debug.log
+nbproject
