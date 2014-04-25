@@ -100,6 +100,7 @@ define(['jquery', 'venation', 'root', 'point2d'], function ($, Venation, Root, V
     },
     done: function () {
       dlLink.setAttribute('href', canvas.toDataURL());
+      dlLink.style.visibility = 'visible';
     }
   };
 
