@@ -1,10 +1,13 @@
 define(['auxin', 'point2d'], function(Auxin, Vec2d){
-  var Root = function(pos){
+  var Root = function(pos, parent){
     this.pos = pos;
-    this.radius = 2;
+    this.parent = parent;
     this.age = 1;
+    this.flow = 1;
     this.closestAuxins = []
   }
+
+  Root.radius = 2;
 
   Root.prototype = {
     grow : function(){
@@ -16,13 +19,24 @@ define(['auxin', 'point2d'], function(Auxin, Vec2d){
         towardsAuxins = Vec2d.sub(this.closestAuxins[i].pos, this.pos);
         averageDirection.add(towardsAuxins);
       }
+      var mag = averageDirection.mag();
 
-      averageDirection.normalize();
-      averageDirection.mult(this.radius*0.5);
+      newPos = new Vec2d(averageDirection.x, averageDirection.y);
+      newPos.normalize();
+      newPos.mult(Root.radius);
+      if (newPos.mag() > averageDirection.mag()) {
+        newPos = averageDirection;
+      }
 
-      newPos = Vec2d.add(this.pos, averageDirection);
+      newPos.add(this.pos);
       this.age++;
-      //this.radius++; //TODO: use Murray's law?
+
+      //update flow counts
+      var ancestor = this.parent;
+      while (ancestor != null){
+        ancestor.flow++;
+        ancestor = ancestor.parent;
+      }
 
       return newPos;
     },
