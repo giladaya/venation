@@ -1,5 +1,6 @@
 define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds){
-  var killRadSq = 10 * 10;
+  var killRadSq = Node.step*Node.step;
+  var infRadSq = Infinity;
 
   var nodeAdditions = [];
   var deadAuxinIds = [];
@@ -44,6 +45,9 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
         //find closest node
         for (var r = 0; r < this.allNodes.length; r++) {
           distSq = Vec2d.distSq(this.allAuxins[a].pos, this.allNodes[r].pos);
+          if (distSq > infRadSq){
+            continue;
+          }
 
           if (distSq < minDistance) {
             minDistance = distSq;
@@ -59,7 +63,9 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
         }
 
         // add closest auxin to node particles closest list
-        this.allNodes[closestId].closestAuxins.push(this.allAuxins[a]);
+        if (closestId >= 0) {
+          this.allNodes[closestId].closestAuxins.push(this.allAuxins[a]);  
+        }
       }
 
       // grow nodes with respect to their closest Auxins
@@ -94,6 +100,9 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
 
     setKillRadius : function (mult) {
       killRadSq = mult*mult*Node.step*Node.step;
+    },
+    setInfluenceRadius : function (mult) {
+      infRadSq = mult*mult*Node.step*Node.step;
     },
     addNode : function (node) {
       this.allNodes.push(node);

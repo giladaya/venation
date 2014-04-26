@@ -27,13 +27,16 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds'], function ($, Venation,
       ctx.fillStyle = 'rgba(0, 0, 0, 1)';
       //ctx.fillStyle = 'rgba(255, 255, 0, 1)';
       
-      Venation.init(canvas.width, canvas.height, 1111);
-      Venation.addNode(new Node(new Vec2d(canvas.width/2, canvas.height)));
+      Node.step = 3;
+      Venation.init(canvas.width, canvas.height, 2000);
+      Venation.addNode(new Node(new Vec2d(canvas.width/2, canvas.height/2)));
+      //Venation.addNode(new Node(new Vec2d(0, 0)));
       //Venation.bounds.l = 40;
       //Venation.bounds.r = 20;
       //Venation.bounds.b = 40;
-      Venation.bounds.t = canvas.height - 40;
+      //Venation.bounds.t = canvas.height - 40;
       Venation.setKillRadius(2);
+      Venation.setInfluenceRadius(7);
     },
     
     checkRequierments: function () {
@@ -55,7 +58,7 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds'], function ($, Venation,
 
     drawNode : function (node) {
       var rad = 0.25 + 0.5*Math.sqrt(node.flow);
-      if (rad < 1.2) return;
+      //if (rad < 1.2) return;
       //rad = Math.max(4, rad);
 
       // var tone = Math.max(0, 255-node.flow*5);
