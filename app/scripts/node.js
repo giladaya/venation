@@ -1,5 +1,5 @@
-define(['auxin', 'point2d'], function(Auxin, Vec2d){
-  var Root = function(pos, parent){
+define(['auxin', 'vec2d'], function(Auxin, Vec2d){
+  var Node = function(pos, parent){
     this.pos = pos;
     this.parent = parent;
     this.age = 1;
@@ -7,9 +7,9 @@ define(['auxin', 'point2d'], function(Auxin, Vec2d){
     this.closestAuxins = []
   }
 
-  Root.radius = 2;
+  Node.step = 2;
 
-  Root.prototype = {
+  Node.prototype = {
     grow : function(){
       var towardsAuxins;
       var averageDirection = new Vec2d(0, 0);
@@ -23,7 +23,7 @@ define(['auxin', 'point2d'], function(Auxin, Vec2d){
 
       newPos = new Vec2d(averageDirection.x, averageDirection.y);
       newPos.normalize();
-      newPos.mult(Root.radius);
+      newPos.mult(Node.step);
       if (newPos.mag() > averageDirection.mag()) {
         newPos = averageDirection;
       }
@@ -47,5 +47,5 @@ define(['auxin', 'point2d'], function(Auxin, Vec2d){
 
   };
 
-  return Root;
+  return Node;
 });

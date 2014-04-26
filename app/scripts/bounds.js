@@ -1,4 +1,4 @@
-define(['point2d'], function(Vec2d){
+define(['vec2d'], function(Vec2d){
 
   var Bounds = function(x1, y1, x2, y2){
     var l, r, t, b;

@@ -1,7 +1,7 @@
-define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Bounds){
-  var deathRadSq = 10 * 10;
+define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds){
+  var killRadSq = 10 * 10;
 
-  var rootAdditions = [];
+  var nodeAdditions = [];
   var deadAuxinIds = [];
   var closestId = -1;
   var distSq;
@@ -9,7 +9,7 @@ define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Boun
 
   Venation = {
     allAuxins : [],
-    allRoots : [],
+    allNodes : [],
     bounds : null, 
 
     init: function (width, height, auxinsNum) {
@@ -22,7 +22,7 @@ define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Boun
       for (var i = 0; i < auxinsNum; i++) {
         x = Math.round(Math.random()*width);
         y = Math.round(Math.random()*height);
-        key = 'x'+Math.floor(x/2/Root.radius)+'y'+Math.floor(y/2/Root.radius);
+        key = 'x'+Math.floor(x/2/Node.step)+'y'+Math.floor(y/2/Node.step);
         if (key in taken){
           continue;
         }
@@ -32,7 +32,7 @@ define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Boun
     },
 
     step: function () {
-      // attributes the roots with all of their closest auxins
+      // attributes the nodes with all of their closest auxins
       for (var a = 0; a < this.allAuxins.length; a++) {
         if (!this.bounds.isInside(this.allAuxins[a].pos)) {
           continue;
@@ -41,16 +41,16 @@ define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Boun
         minDistance = this.width*this.width+this.height*this.height;
         closestId = -1;
 
-        //find closest root
-        for (var r = 0; r < this.allRoots.length; r++) {
-          distSq = Vec2d.distSq(this.allAuxins[a].pos, this.allRoots[r].pos);
+        //find closest node
+        for (var r = 0; r < this.allNodes.length; r++) {
+          distSq = Vec2d.distSq(this.allAuxins[a].pos, this.allNodes[r].pos);
 
           if (distSq < minDistance) {
             minDistance = distSq;
             closestId = r;
           }
 
-          if (distSq < deathRadSq) {
+          if (distSq < killRadSq) {
             deadAuxinIds.push(a);
           }
         }
@@ -58,32 +58,32 @@ define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Boun
           console.log(minDistance);  
         }
 
-        // add closest auxin to root particles closest list
-        this.allRoots[closestId].closestAuxins.push(this.allAuxins[a]);
+        // add closest auxin to node particles closest list
+        this.allNodes[closestId].closestAuxins.push(this.allAuxins[a]);
       }
 
-      // grow roots with respect to their closest Auxins
-      var root, newPos;
-      for (r = 0; r < this.allRoots.length; r++) {
-        root = this.allRoots[r];
-        root.age++;
-        // if the root particle has at least one auxin to grow towards
-        if (root.closestAuxins.length > 0) {
-          newPos = root.grow();
+      // grow nodes with respect to their closest Auxins
+      var node, newPos;
+      for (r = 0; r < this.allNodes.length; r++) {
+        node = this.allNodes[r];
+        node.age++;
+        // if the node particle has at least one auxin to grow towards
+        if (node.closestAuxins.length > 0) {
+          newPos = node.grow();
           if (newPos != null){
-            rootAdditions.push(new Root(newPos, root));    
+            nodeAdditions.push(new Node(newPos, node));    
           }
         }
 
-        // clear roots auxin list for next iteration
-        root.resetClosestAuxins();
+        // clear nodes auxin list for next iteration
+        node.resetClosestAuxins();
       }
 
-      // add the new root particles to the list
-      for (r = 0; r < rootAdditions.length; r++) {
-        this.allRoots.push(rootAdditions[r]);
+      // add the new node particles to the list
+      for (r = 0; r < nodeAdditions.length; r++) {
+        this.allNodes.push(nodeAdditions[r]);
       }
-      rootAdditions = [];
+      nodeAdditions = [];
 
       // delete used up auxins
       for (a = 0; a < deadAuxinIds.length; a++) {
@@ -92,11 +92,11 @@ define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Boun
       deadAuxinIds = [];
     },
 
-    setDeathRadius : function (rad) {
-      deathRadSq = rad*rad;// + Root.radius*Root.radius;  
+    setKillRadius : function (mult) {
+      killRadSq = mult*mult*Node.step*Node.step;
     },
     addNode : function (node) {
-      this.allRoots.push(node);
+      this.allNodes.push(node);
     },
     setBounds : function (bounds) {
       this.bounds = bounds;

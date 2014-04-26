@@ -1,4 +1,4 @@
-define(['jquery', 'venation', 'root', 'point2d', 'bounds'], function ($, Venation, Root, Vec2d, Bounds) {
+define(['jquery', 'venation', 'node', 'vec2d', 'bounds'], function ($, Venation, Node, Vec2d, Bounds) {
   'use strict';
 
   //DOM elements
@@ -28,12 +28,12 @@ define(['jquery', 'venation', 'root', 'point2d', 'bounds'], function ($, Venatio
       //ctx.fillStyle = 'rgba(255, 255, 0, 1)';
       
       Venation.init(canvas.width, canvas.height, 1111);
-      Venation.addNode(new Root(new Vec2d(canvas.width/2, canvas.height)));
+      Venation.addNode(new Node(new Vec2d(canvas.width/2, canvas.height)));
       //Venation.bounds.l = 40;
       //Venation.bounds.r = 20;
       //Venation.bounds.b = 40;
       Venation.bounds.t = canvas.height - 40;
-      Venation.setDeathRadius(6);
+      Venation.setKillRadius(2);
     },
     
     checkRequierments: function () {
@@ -69,16 +69,16 @@ define(['jquery', 'venation', 'root', 'point2d', 'bounds'], function ($, Venatio
     },
 
     draw : function() {
-      var oldRootsCount = Venation.allRoots.length;
+      var oldNodesCount = Venation.allNodes.length;
       Venation.step();
       var r1;
-      if (Venation.allRoots.length > 1){
+      if (Venation.allNodes.length > 1){
         // ctx.fillStyle = 'rgba(255, 255, 255, 1)';
         // ctx.fillRect(0, 0, canvas.width, canvas.height);
         // ctx.fillStyle = 'rgba(0, 0, 0, 1)';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (var i=0; i<Venation.allRoots.length; i++){
-          r1 = Venation.allRoots[i];
+        for (var i=0; i<Venation.allNodes.length; i++){
+          r1 = Venation.allNodes[i];
           if (r1.parent != null){
             app.drawNode(r1);  
           }
@@ -89,7 +89,7 @@ define(['jquery', 'venation', 'root', 'point2d', 'bounds'], function ($, Venatio
       // Venation.bounds.b -= 1;
       // Venation.bounds.t += 1;
       // ctx.strokeRect(Venation.bounds.l, Venation.bounds.b, (Venation.bounds.r - Venation.bounds.l), (Venation.bounds.t - Venation.bounds.b));
-      if (Venation.allAuxins.length > 0 && Venation.allRoots.length > oldRootsCount){
+      if (Venation.allAuxins.length > 0 && Venation.allNodes.length > oldNodesCount){
         requestAnimationFrame(app.draw);
       } else {
         app.done();
