@@ -1,4 +1,4 @@
-define(['jquery', 'venation', 'root', 'point2d'], function ($, Venation, Root, Vec2d) {
+define(['jquery', 'venation', 'root', 'point2d', 'bounds'], function ($, Venation, Root, Vec2d, Bounds) {
   'use strict';
 
   //DOM elements
@@ -27,12 +27,12 @@ define(['jquery', 'venation', 'root', 'point2d'], function ($, Venation, Root, V
       ctx.fillStyle = 'rgba(0, 0, 0, 1)';
       //ctx.fillStyle = 'rgba(255, 255, 0, 1)';
       
-      var initRoots = [];
-      initRoots.push(new Root(new Vec2d(canvas.width/2, canvas.height/2)));
-      //initRoots.push(new Root(new Vec2d(canvas.width, canvas.height/2)));
-      //initRoots.push(new Root(new Vec2d(0, 0)));
-      //initRoots.push(new Root(new Vec2d(canvas.width, canvas.height)));
-      Venation.init(canvas.width, canvas.height, initRoots, 1500);
+      Venation.init(canvas.width, canvas.height, 1111);
+      Venation.addNode(new Root(new Vec2d(canvas.width/2, canvas.height)));
+      //Venation.bounds.l = 40;
+      //Venation.bounds.r = 20;
+      //Venation.bounds.b = 40;
+      Venation.bounds.t = canvas.height - 40;
       Venation.setDeathRadius(6);
     },
     
@@ -56,18 +56,9 @@ define(['jquery', 'venation', 'root', 'point2d'], function ($, Venation, Root, V
     drawNode : function (node) {
       var rad = 0.25 + 0.5*Math.sqrt(node.flow);
       if (rad < 1.2) return;
-      rad = Math.max(3, rad);
-      //rectangles
-      //ctx.fillRect(node.pos.x, node.pos.y, rad, rad);
+      //rad = Math.max(4, rad);
 
-      //circles
-      // ctx.beginPath();
-      // ctx.arc(node.pos.x, node.pos.y, rad, 0, Math.PI*2); 
-      // ctx.closePath();
-      // ctx.fill();
-
-      //lines
-      // var tone = Math.max(0, 255-rad*100);
+      // var tone = Math.max(0, 255-node.flow*5);
       // ctx.strokeStyle = 'rgba('+tone+', '+tone+', '+tone+', 1)';
       ctx.lineWidth = rad;
       ctx.beginPath();
@@ -82,9 +73,10 @@ define(['jquery', 'venation', 'root', 'point2d'], function ($, Venation, Root, V
       Venation.step();
       var r1;
       if (Venation.allRoots.length > 1){
-        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+        // ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+        // ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (var i=0; i<Venation.allRoots.length; i++){
           r1 = Venation.allRoots[i];
           if (r1.parent != null){
@@ -92,6 +84,11 @@ define(['jquery', 'venation', 'root', 'point2d'], function ($, Venation, Root, V
           }
         }
       }
+      //Venation.bounds.l -= 2;
+      // Venation.bounds.r += 2;
+      // Venation.bounds.b -= 1;
+      // Venation.bounds.t += 1;
+      // ctx.strokeRect(Venation.bounds.l, Venation.bounds.b, (Venation.bounds.r - Venation.bounds.l), (Venation.bounds.t - Venation.bounds.b));
       if (Venation.allAuxins.length > 0 && Venation.allRoots.length > oldRootsCount){
         requestAnimationFrame(app.draw);
       } else {

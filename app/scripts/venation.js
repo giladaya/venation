@@ -1,4 +1,4 @@
-define(['point2d', 'auxin', 'root'], function(Vec2d, Auxin, Root){
+define(['point2d', 'auxin', 'root', 'bounds'], function(Vec2d, Auxin, Root, Bounds){
   var deathRadSq = 10 * 10;
 
   var rootAdditions = [];
@@ -10,10 +10,12 @@ define(['point2d', 'auxin', 'root'], function(Vec2d, Auxin, Root){
   Venation = {
     allAuxins : [],
     allRoots : [],
+    bounds : null, 
 
-    init: function (width, height, roots, auxinsNum) {
+    init: function (width, height, auxinsNum) {
       this.width = width;
       this.height = height;
+      this.bounds = new Bounds(0, 0, width, height);
 
       var x, y, key, taken = {};
       //set all positions of auxins
@@ -27,15 +29,14 @@ define(['point2d', 'auxin', 'root'], function(Vec2d, Auxin, Root){
         this.allAuxins.push(new Auxin(new Vec2d(x, y)));  
         taken[key] = 1;
       }
-
-      for (i = 0; i < roots.length; i++) {
-        this.allRoots.push(roots[i]);  
-      }
     },
 
     step: function () {
       // attributes the roots with all of their closest auxins
       for (var a = 0; a < this.allAuxins.length; a++) {
+        if (!this.bounds.isInside(this.allAuxins[a].pos)) {
+          continue;
+        }
 
         minDistance = this.width*this.width+this.height*this.height;
         closestId = -1;
@@ -90,8 +91,15 @@ define(['point2d', 'auxin', 'root'], function(Vec2d, Auxin, Root){
       }
       deadAuxinIds = [];
     },
+
     setDeathRadius : function (rad) {
       deathRadSq = rad*rad;// + Root.radius*Root.radius;  
+    },
+    addNode : function (node) {
+      this.allRoots.push(node);
+    },
+    setBounds : function (bounds) {
+      this.bounds = bounds;
     }
 
   };
