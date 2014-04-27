@@ -4,7 +4,8 @@ define(['auxin', 'vec2d'], function(Auxin, Vec2d){
     this.parent = parent;
     this.age = 1;
     this.flow = 1;
-    this.closestAuxins = []
+    this.closestAuxins = [];
+    this.childCount = 0;
   }
 
   Node.step = 2;

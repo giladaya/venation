@@ -77,7 +77,8 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
         if (node.closestAuxins.length > 0) {
           newPos = node.grow();
           if (newPos != null){
-            nodeAdditions.push(new Node(newPos, node));    
+            nodeAdditions.push(new Node(newPos, node));
+            node.childCount++;
           }
         }
 

@@ -27,16 +27,17 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds'], function ($, Venation,
       ctx.fillStyle = 'rgba(0, 0, 0, 1)';
       //ctx.fillStyle = 'rgba(255, 255, 0, 1)';
       
-      Node.step = 3;
-      Venation.init(canvas.width, canvas.height, 2000);
-      Venation.addNode(new Node(new Vec2d(canvas.width/2, canvas.height/2)));
+      Node.step = 4;
+      Venation.init(canvas.width, canvas.height, 1000);
+      Venation.addNode(new Node(new Vec2d(0, canvas.height)));
+      // Venation.addNode(new Node(new Vec2d(canvas.width/2, canvas.height/2)));
       //Venation.addNode(new Node(new Vec2d(0, 0)));
       //Venation.bounds.l = 40;
       //Venation.bounds.r = 20;
       //Venation.bounds.b = 40;
       //Venation.bounds.t = canvas.height - 40;
       Venation.setKillRadius(2);
-      Venation.setInfluenceRadius(7);
+      Venation.setInfluenceRadius(4);
     },
     
     checkRequierments: function () {
@@ -57,12 +58,18 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds'], function ($, Venation,
     },
 
     drawNode : function (node) {
-      var rad = 0.25 + 0.5*Math.sqrt(node.flow);
-      //if (rad < 1.2) return;
-      //rad = Math.max(4, rad);
+      var rad = Math.sqrt(node.flow);
+      //if (rad < 2) return;
+      //rad = Math.max(5, rad);
+      rad = Math.min(12, rad);
 
       // var tone = Math.max(0, 255-node.flow*5);
       // ctx.strokeStyle = 'rgba('+tone+', '+tone+', '+tone+', 1)';
+      if (node.childCount == 0){
+        ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
+      } else {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
+      }
       ctx.lineWidth = rad;
       ctx.beginPath();
       ctx.moveTo(node.parent.pos.x, node.parent.pos.y);
