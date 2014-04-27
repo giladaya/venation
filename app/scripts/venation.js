@@ -33,9 +33,11 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
     },
 
     step: function () {
+      var node, auxin;
       // attributes the nodes with all of their closest auxins
       for (var a = 0; a < this.allAuxins.length; a++) {
-        if (!this.bounds.isInside(this.allAuxins[a].pos)) {
+        auxin = this.allAuxins[a];
+        if (!this.bounds.isInside(auxin.pos)) {
           continue;
         }
 
@@ -44,7 +46,8 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
 
         //find closest node
         for (var r = 0; r < this.allNodes.length; r++) {
-          distSq = Vec2d.distSq(this.allAuxins[a].pos, this.allNodes[r].pos);
+          node = this.allNodes[r];
+          distSq = Vec2d.distSq(auxin.pos, node.pos);
           if (distSq > infRadSq){
             continue;
           }
@@ -58,18 +61,15 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
             deadAuxinIds.push(a);
           }
         }
-        if (this.allAuxins.length < 5){
-          console.log(minDistance);  
-        }
 
         // add closest auxin to node particles closest list
         if (closestId >= 0) {
-          this.allNodes[closestId].closestAuxins.push(this.allAuxins[a]);  
+          this.allNodes[closestId].closestAuxins.push(auxin);  
         }
       }
 
       // grow nodes with respect to their closest Auxins
-      var node, newPos;
+      var newPos;
       for (r = 0; r < this.allNodes.length; r++) {
         node = this.allNodes[r];
         node.age++;
