@@ -1,4 +1,4 @@
-define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds){
+define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bounds){
   var killRadSq = Node.step*Node.step;
   var infRadSq = Infinity;
 
@@ -52,7 +52,7 @@ define(['vec2d', 'auxin', 'node', 'bounds'], function(Vec2d, Auxin, Node, Bounds
             continue;
           }
 
-          if (distSq < minDistance) {
+          if (distSq < minDistance) {// && Math.random() > 0.3 ) {
             minDistance = distSq;
             closestId = r;
           }
