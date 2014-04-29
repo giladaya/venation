@@ -16,7 +16,7 @@ define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bo
     init: function (width, height, auxinsNum) {
       this.width = width;
       this.height = height;
-      this.bounds = new Bounds(0, 0, width, height);
+      this.bounds = this.bounds || new Bounds(0, 0, width, height);
 
       var x, y, key, taken = {};
       //set all positions of auxins
@@ -52,7 +52,7 @@ define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bo
             continue;
           }
 
-          if (distSq < minDistance) {// && Math.random() > 0.3 ) {
+          if (distSq < minDistance) {
             minDistance = distSq;
             closestId = r;
           }
