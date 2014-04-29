@@ -131,7 +131,7 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
 
       ctx.beginPath();
       ctx.moveTo(0, terr[0]);
-      for (var t = 1; t < terr.length; t++) {
+      for (var t = 1; t < canvas.width; t++) {
         ctx.lineTo(t, terr[t]);
       }
       // finish creating the rect so we can fill it
