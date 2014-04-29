@@ -47,7 +47,7 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
       //generate terrain
       terr = Terrain.generate(canvas.width, groundHeight, groundHeight/2, 0.6, 1, 0);
       var delta = groundHeight - terr[Math.round(canvas.width*0.3)];
-      for (var t = 1; t < terr.length; t++) {
+      for (var t = 0; t < terr.length; t++) {
         terr[t] = canvas.height-terr[t]-delta;
       }
     },
