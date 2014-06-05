@@ -3,9 +3,16 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
 
   //DOM elements
   var canvas, ctx, dlLink;
-  var maxAge = 80;
-  var groundHeight = 50;
+  var minAge = 1;
   var terr;
+  var tree, root;
+  var width = 0;
+  var height = 0;
+  var tWidth, tHeight, tOffset;
+  var groundHeight = 50;
+  var numSources;
+  var lifeSpan = 80;
+  var isLive = true;
 
   function showError (msg) {
     alert(msg);
@@ -14,7 +21,6 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
   
   var app = {
     init: function () {
-      console.log('Hello!');
       if (!this.checkRequierments()) {
         showError('Your browser is not supported. Please use Chrome, Firefox or IE10 and above');
         return false;
@@ -22,34 +28,54 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
       this.cacheElements();
       this.attachEvents();
 
-      canvas.style.width = canvas.width+'px';
-      canvas.style.height = canvas.height+'px';
+      width = canvas.width;
+      height = canvas.height;
+      tWidth = width*0.9;
+      tHeight = height*0.7;
+      //groundHeight = tHeight-20;
+
+      canvas.style.width = width+'px';
+      canvas.style.height = height+'px';
       ctx.lineCap = 'round';
       //ctx.lineJoin = 'round';
       //ctx.fillStyle = 'rgba(255, 255, 0, 1)';
       
-      var sSparsity  = 11.5; //average distance between sources
-      var numSources = Math.floor(canvas.width*canvas.width/sSparsity/sSparsity);
+      var sSparsity  = 8.5; //average distance between sources
+      numSources = Math.floor(tHeight*tWidth/sSparsity/sSparsity);
       console.log('Using '+numSources+' sources');
       Node.step = 4;
-      Venation.init(canvas.width, canvas.height, numSources);
-      //Venation.addNode(new Node(new Vec2d(0, canvas.height)));
-      Venation.addNode(new Node(new Vec2d(canvas.width*0.3, canvas.height-groundHeight)));
-      //Venation.addNode(new Node(new Vec2d(0, 0)));
-      //Venation.setBounds(new CircBounds(canvas.width*0.4, canvas.height*0.47, canvas.height/1.8));
-      Venation.bounds.l = groundHeight;
-      // Venation.bounds.r = canvas.width - 25;
-      // Venation.bounds.b = 40;
-      Venation.bounds.t = canvas.height - groundHeight;// - Node.step*2;
-      Venation.setKillRadius(2);
-      Venation.setInfluenceRadius(4);
+
+      tree = new Venation(tWidth, tHeight);
+      tree.setKillRadius(2);
+      tree.setInfluenceRadius(4);
+
+      root = new Venation(tWidth, height - tHeight);
+      root.setKillRadius(2);
+      root.setInfluenceRadius(4);
+
+      this.resetTree();
 
       //generate terrain
-      terr = Terrain.generate(canvas.width, groundHeight, groundHeight/2, 0.6, 1, 0);
-      var delta = groundHeight - terr[Math.round(canvas.width*0.3)];
+      terr = Terrain.generate(width, groundHeight, groundHeight/2, 0.6, 1, 0);
+      var delta = groundHeight - terr[Math.round(width*0.3)];
       for (var t = 0; t < terr.length; t++) {
-        terr[t] = canvas.height-terr[t]-delta;
+        terr[t] = height-terr[t]-delta;
       }
+    },
+
+    resetTree : function () {
+      tree.reset();
+      tree.initSources(numSources, new CircBounds(tWidth*0.2, tHeight, tWidth/2));
+      //tree.initSources(numSources);
+      tree.addNode(new Node(new Vec2d(tWidth*0.2, tHeight)));
+
+      root.reset();
+      root.initSources(numSources, new CircBounds(tWidth*0.2, tHeight/2, tHeight/2));
+      root.addNode(new Node(new Vec2d(tWidth*0.2, 0)));
+
+      tOffset = 0.3*(width-tWidth);
+      isLive = true;
+      minAge = -1;
     },
     
     checkRequierments: function () {
@@ -69,13 +95,17 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
       requestAnimationFrame(this.draw);
     },
 
-    drawNodeCherry : function (node) {
+    drawNodeCherry : function (node, cherry) {
       var rad = Math.sqrt(node.flow)+1;
       if (rad < 2) {
         return;
       }
       //rad = Math.max(5, rad);
       //rad = Math.min(8, rad);
+
+      // ctx.arc(node.pos.x, node.pos.y, rad*8, 0, Math.PI * 2);
+      // ctx.fillStyle = 'rgba(64, 128, 64, 0.1)';
+      // ctx.fill();
 
       // var tone = Math.max(0, 255-node.flow*5);
       // ctx.strokeStyle = 'rgba('+tone+', '+tone+', '+tone+', 1)';
@@ -101,57 +131,58 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
       // ctx.stroke();
 
       //cherries
-      if (node.childCount == 0 && (node.age > 15 && node.age < 45)){
+      if (cherry && node.childCount == 0 && (node.age > 15 && node.age < 45)){
         app.drawCherry(node.parent.pos.x+3,node.parent.pos.y);
       } 
     },
 
     drawCherry : function (x, y) {
       ctx.beginPath();
-        ctx.fillStyle = 'rgba(255, 0, 0, 1)';
-        ctx.arc(x, y,3,0,Math.PI*2, false);
-        ctx.fill();
+      ctx.fillStyle = 'rgba(255, 0, 0, 1)';
+      ctx.arc(x, y,3,0,Math.PI*2, false);
+      ctx.fill();
 
-        ctx.beginPath();
-        ctx.fillStyle = 'white';
-        ctx.arc(x+1.5, y-1,1,0,Math.PI*2, false);
-        ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = 'white';
+      ctx.arc(x+1.5, y-1,1,0,Math.PI*2, false);
+      ctx.fill();
     }, 
 
     drawBg : function () {
-      var grd=ctx.createLinearGradient(0,0,0,canvas.height);
+      var grd=ctx.createLinearGradient(0,0,0,height);
       grd.addColorStop(0,'#d6f1d9');
       grd.addColorStop(1,'#f4f081');
       ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      //ground
-      ctx.fillStyle = 'black';
-      // ctx.fillRect(0, canvas.height-groundHeight, canvas.width, canvas.height);
-
-      ctx.beginPath();
-      ctx.moveTo(0, terr[0]);
-      for (var t = 1; t < canvas.width; t++) {
-        ctx.lineTo(t, terr[t]);
-      }
-      // finish creating the rect so we can fill it
-      ctx.lineTo(canvas.width, canvas.height);
-      ctx.lineTo(0, canvas.height);
-      ctx.closePath();
-      ctx.fill();
+      ctx.fillRect(0, 0, width, height);
 
       //sun
       ctx.beginPath();
       //ctx.fillStyle = 'rgba(56, 0, 0, 1)';
       ctx.fillStyle = 'white';
-      grd=ctx.createLinearGradient(0,0,0,canvas.height);
+      grd=ctx.createLinearGradient(0,0,0,height);
       grd.addColorStop(0,'white');
       grd.addColorStop(0.25,'white');
-      grd.addColorStop(1,'rgba(255, 255, 255, 0)');
+      grd.addColorStop(0.5,'rgba(255, 255, 255, 0)');
       ctx.fillStyle = grd;
-      ctx.arc(canvas.width*0.7,canvas.height*0.48-Venation.allNodes[0].age/2,Math.min(canvas.width, canvas.height)/4,0,Math.PI*2, false);
+      ctx.arc(width*0.7,height*0.3,Math.min(width, height)/4,0,Math.PI*2, false);
       ctx.fill();
     }, 
+
+    drawFg : function () {
+      //ground
+      ctx.fillStyle = 'black';
+      // ctx.fillRect(0, height-groundHeight, width, height);
+      ctx.beginPath();
+      ctx.moveTo(0, terr[0]);
+      for (var t = 1; t < width; t++) {
+        ctx.lineTo(t, terr[t]);
+      }
+      // finish creating the rect so we can fill it
+      ctx.lineTo(width, height);
+      ctx.lineTo(0, height);
+      ctx.closePath();
+      ctx.fill();
+    },
 
     drawNodeStd : function (node) {
       var rad = Math.sqrt(node.flow);
@@ -179,38 +210,52 @@ define(['jquery', 'venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], func
     },
 
     draw : function() {
-      var oldNodesCount = Venation.allNodes.length;
-      Venation.step();
+      var oldNodesCount = tree.allNodes.length;
+      if (isLive) {
+        tree.step();
+        root.step();
+      }
       var r1;
-      if (Venation.allNodes.length > 1){
+      if (tree.allNodes.length > 1){
         app.drawBg();
+        //ctx.clearRect(0, 0, width, height);
+        ctx.save();
 
-        
-
-        // ctx.clearRect(0, 0, canvas.width, canvas.height);
-        //for (var i=0; i<Venation.allNodes.length; i++){
-        for (var i=0; i<Venation.allNodes.length; i++){
-          r1 = Venation.allNodes[i];
-          if (r1.parent != null){
-            app.drawNodeCherry(r1);  
+        ctx.translate(tOffset, height-tHeight-groundHeight*1.5);
+        for (var i=0; i<tree.allNodes.length; i++){
+          r1 = tree.allNodes[i];
+          if (r1.parent != null && r1.age >= minAge){
+            app.drawNodeCherry(r1, true);  
           }
         }
+
+        ctx.translate(0, tHeight);
+        for (var i=0; i<root.allNodes.length; i++){
+          r1 = root.allNodes[i];
+          if (r1.parent != null && r1.age >= minAge){
+            app.drawNodeCherry(r1, false);
+          }
+        }
+
+        ctx.restore();
+        app.drawFg();
       }
-      //Venation.bounds.l -= 2;
-      // Venation.bounds.r += 2;
-      // Venation.bounds.b -= 1;
-      // Venation.bounds.t += 1;
-      // ctx.strokeRect(Venation.bounds.l, Venation.bounds.b, (Venation.bounds.r - Venation.bounds.l), (Venation.bounds.t - Venation.bounds.b));
-      if (Venation.allAuxins.length > 0 && Venation.allNodes.length > oldNodesCount && Venation.allNodes[0].age<maxAge){
+      if (tree.allAuxins.length > 0 && tree.allNodes.length > oldNodesCount && tree.age<lifeSpan){
         requestAnimationFrame(app.draw);
       } else {
+        isLive = false;
+        minAge++;
+        //requestAnimationFrame(app.draw);
         app.done();
+      }
+      if (minAge >= lifeSpan){
+        app.resetTree();
       }
     },
     done: function () {
       dlLink.setAttribute('href', canvas.toDataURL());
       dlLink.style.visibility = 'visible';
-      console.log('root age: '+Venation.allNodes[0].age);
+      console.log('root age: '+tree.allNodes[0].age);
     }
   };
 

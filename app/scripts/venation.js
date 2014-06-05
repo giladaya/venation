@@ -8,38 +8,50 @@ define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bo
   var distSq;
   var minDistance;
 
-  Venation = {
+  var Venation = function (width, height) {
+    this.width = width;
+    this.height = height;
+  };
+
+  Venation.prototype = {
+    age : 0,
     allAuxins : [],
     allNodes : [],
-    bounds : null, 
 
-    init: function (width, height, auxinsNum) {
-      this.width = width;
-      this.height = height;
-      this.bounds = this.bounds || new Bounds(0, 0, width, height);
+    initSources: function (sourcesNum, bounds) {
+      this.allAuxins = [];
+      bounds = bounds || new Bounds(0, 0, this.width, this.height);
 
-      var x, y, key, taken = {};
+      var x, y, key, taken = {}, pos;
       //set all positions of auxins
-      for (var i = 0; i < auxinsNum; i++) {
-        x = Math.round(Math.random()*width);
-        y = Math.round(Math.random()*height);
+      for (var i = 0; i < sourcesNum; i++) {
+        x = Math.round(Math.random()*this.width);
+        y = Math.round(Math.random()*this.height);
         key = 'x'+Math.floor(x/2/Node.step)+'y'+Math.floor(y/2/Node.step);
         if (key in taken){
           continue;
         }
-        this.allAuxins.push(new Auxin(new Vec2d(x, y)));  
+        pos = new Vec2d(x, y);
+        if (!bounds.isInside(pos)){
+          continue;
+        }
+        this.allAuxins.push(new Auxin(pos));  
         taken[key] = 1;
       }
     },
 
+    //reset all nodes and age
+    reset : function () {
+      this.allNodes = [];
+      this.age = 0;
+    },
+
     step: function () {
+      this.age++;
       var node, auxin;
       // attributes the nodes with all of their closest auxins
       for (var a = 0; a < this.allAuxins.length; a++) {
         auxin = this.allAuxins[a];
-        if (!this.bounds.isInside(auxin.pos)) {
-          continue;
-        }
 
         minDistance = this.width*this.width+this.height*this.height;
         closestId = -1;
@@ -108,10 +120,6 @@ define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bo
     addNode : function (node) {
       this.allNodes.push(node);
     },
-    setBounds : function (bounds) {
-      this.bounds = bounds;
-    }
-
   };
 
   return Venation;
