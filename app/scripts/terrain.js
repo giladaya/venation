@@ -1,6 +1,12 @@
 define([], function(){
   // Code from here: http://www.somethinghitme.com/2013/11/11/simple-2d-terrain-with-midpoint-displacement/
   var terrain = {
+    /* 
+     * width and height are the overall width and height we have to work with, 
+     * displace is the maximum deviation value. This stops the terrain from going out of bounds if we choose
+     * lf - initial left point (in percentage of height)
+     * rf - initial right point (in percentage of height)
+     */
     generate: function(width, height, displace, roughness, lf, rf) {
       var points = [],
         // Gives us a power of 2 based on our width
@@ -17,7 +23,7 @@ define([], function(){
         // Iterate through each segment calculating the center point
         for (var j = (power / i) / 2; j < power; j += power / i) {
           points[j] = ((points[j - (power / i) / 2] + points[j + (power / i) / 2]) / 2);
-          points[j] += (Math.random() * displace * 2) - displace
+          points[j] += (Math.random() * displace * 2) - displace * 1.3
         }
         // reduce our random range
         displace *= roughness;
