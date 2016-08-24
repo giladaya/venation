@@ -301,6 +301,9 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
 
     drawSun: function(x, y, rad) {
       function arrToColor(rgb, alpha) {
+        if (isNaN(rgb[0]) || isNaN(rgb[1]) || isNaN(rgb[2])) {
+          return 'rgba(0,0,0, '+alpha+')';
+        }
         return 'rgba('+Math.round(rgb[0])+', '+Math.round(rgb[1])+', '+Math.round(rgb[2])+', '+alpha+')';
       }
 
