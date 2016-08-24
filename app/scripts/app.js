@@ -23,9 +23,10 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
 
     //seed params
     this.sparsity = 5;
-    this.step_size = 3;
+    this.step_size = 4;
     this.kill_radius = 3;
     this.influence_radius = 4;
+    this.shrubbiness = 0.1; //higher values get thicker, more crooked branches
     this.lifespan = 80;
     this.ground_roughness = 0.55;
 
@@ -90,6 +91,7 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
       f1.add(options, 'kill_radius', 1, 10).step(1);
       f1.add(options, 'influence_radius', 1, 10).step(1);
       f1.add(options, 'lifespan', 1, 150).step(10);
+      f1.add(options, 'shrubbiness', 0.0, 0.9).step(0.1);
       f1.add(options, 'ground_roughness', 0, 1).step(0.05);
 
       var f2 = gui.addFolder('post');
@@ -108,7 +110,7 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
       f2.add(options, 'cherries');
 
       // Iterate over all controllers to add change events
-      gui.__folders['real-time'].__controllers.forEach(function(ctl){
+      gui.__folders.post.__controllers.forEach(function(ctl){
         ctl.onChange(function(value) {
           app.draw();
         });
@@ -125,6 +127,7 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
       tree = new Venation(tWidth, tHeight);
       tree.setKillRadius(options.kill_radius);
       tree.setInfluenceRadius(options.influence_radius);
+      tree.setRandomness(options.shrubbiness);
 
       root = new Venation(tWidth, height - tHeight);
       root.setKillRadius(options.kill_radius);

@@ -1,6 +1,7 @@
 define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bounds){
   var killRadSq = Node.step*Node.step;
   var infRadSq = Infinity;
+  var randomness = 0;
 
   var nodeAdditions = [];
   var deadAuxinIds = [];
@@ -64,7 +65,7 @@ define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bo
             continue;
           }
 
-          if (distSq < minDistance) {
+          if (distSq < minDistance && Math.random() > randomness ) {
             minDistance = distSq;
             closestId = r;
           }
@@ -116,6 +117,9 @@ define(['vec2d', 'auxin', 'node', 'bounds/box'], function(Vec2d, Auxin, Node, Bo
     },
     setInfluenceRadius : function (mult) {
       infRadSq = mult*mult*Node.step*Node.step;
+    },
+    setRandomness : function (factor) {
+      randomness = factor;
     },
     addNode : function (node) {
       this.allNodes.push(node);
