@@ -39,7 +39,9 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
     this.sky_top_color = '#80f2b6';
     this.sky_bottom_color = '#f7c346';
     this.sun_color = [200, 0, 0];
-    this.sun_height = 60;
+    this.sun_vpos = 60;
+    this.sun_hpos = 70;
+    this.sun_radius = 25;
     this.shading = true;
     this.cherries = true;
   }
@@ -90,7 +92,7 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
       f1.add(options, 'lifespan', 1, 150).step(10);
       f1.add(options, 'ground_roughness', 0, 1).step(0.05);
 
-      var f2 = gui.addFolder('real-time');
+      var f2 = gui.addFolder('post');
       f2.add(options, 'ground_height', -50, 100).step(1);
       f2.add(options, 'node_min_age', 0, 100).step(1);
       f2.add(options, 'node_min_radius', 0, 20).step(1);
@@ -99,7 +101,9 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
       f2.addColor(options, 'sky_top_color');
       f2.addColor(options, 'sky_bottom_color');
       f2.addColor(options, 'sun_color');
-      f2.add(options, 'sun_height', 0, 100).step(1);
+      f2.add(options, 'sun_vpos', 0, 100).step(1);
+      f2.add(options, 'sun_hpos', 0, 100).step(1);
+      f2.add(options, 'sun_radius', 0, 100).step(1);
       f2.add(options, 'shading');
       f2.add(options, 'cherries');
 
@@ -296,7 +300,7 @@ define(['venation', 'node', 'vec2d', 'bounds/circle', 'terrain'], function (Vena
       ctx.fillRect(0, 0, width, height);
 
       //sun
-      app.drawSun(width*0.7, height*(1-options.sun_height/100), Math.min(width, height)/4);
+      app.drawSun(width*options.sun_hpos/100, height*(1-options.sun_vpos/100), height*options.sun_radius/100);
     },
 
     drawSun: function(x, y, rad) {
